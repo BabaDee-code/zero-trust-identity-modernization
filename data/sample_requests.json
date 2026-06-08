@@ -1,0 +1,29 @@
+[
+  {
+    "request_id": "REQ-1001",
+    "user_risk": "medium",
+    "device_compliant": true,
+    "mfa_strength": "push",
+    "privileged": false,
+    "location_risk": "low",
+    "app_sensitivity": "standard"
+  },
+  {
+    "request_id": "REQ-1002",
+    "user_risk": "low",
+    "device_compliant": false,
+    "mfa_strength": "phishing_resistant",
+    "privileged": true,
+    "location_risk": "low",
+    "app_sensitivity": "restricted"
+  },
+  {
+    "request_id": "REQ-1003",
+    "user_risk": "low",
+    "device_compliant": true,
+    "mfa_strength": "phishing_resistant",
+    "privileged": true,
+    "location_risk": "low",
+    "app_sensitivity": "restricted"
+  }
+]
