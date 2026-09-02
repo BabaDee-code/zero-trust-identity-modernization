@@ -33,7 +33,6 @@ Allow / Step-up MFA / Deny / Review
 ```text
 src/zt_policy_engine/       Core policy engine
 data/                       Sample access requests
-policies/                   Policy-as-code controls
 tests/                      Unit tests
 .github/workflows/ci.yml    Automated test workflow
 docs/architecture.md        Architecture and control mapping
@@ -46,8 +45,10 @@ python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\\Scripts\\activate
 pip install -r requirements-dev.txt
 pytest -q
-python -m zt_policy_engine.evaluate data/sample_requests.json
+PYTHONPATH=src python -m zt_policy_engine.evaluate data/sample_requests.json
 ```
+
+On Windows PowerShell, use `$env:PYTHONPATH = "src"` before the final command.
 
 ## Example output
 
