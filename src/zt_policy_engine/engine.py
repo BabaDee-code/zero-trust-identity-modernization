@@ -4,6 +4,14 @@ from dataclasses import dataclass
 from typing import Any
 
 
+VALID_CONTEXT_VALUES = {
+    "user_risk": {"low", "medium", "high"},
+    "location_risk": {"low", "medium", "high"},
+    "mfa_strength": {"none", "sms", "push", "phishing_resistant"},
+    "app_sensitivity": {"standard", "sensitive", "restricted"},
+}
+
+
 @dataclass(frozen=True)
 class Decision:
     request_id: str
@@ -23,9 +31,9 @@ class Decision:
 def evaluate_request(request: dict[str, Any]) -> Decision:
     """Evaluate an access request using Zero Trust policy principles.
 
-    This is intentionally deterministic and auditable. It is not tied to any
-    vendor product, so the logic can be mapped to Entra ID Conditional Access,
-    Okta, Zscaler, Netskope, or custom authorization layers.
+    Security context is validated before policy evaluation. Unsupported values
+    fail closed so malformed identity or device telemetry cannot silently weaken
+    an authorization decision.
     """
     request_id = str(request.get("request_id", "unknown"))
     user_risk = request.get("user_risk", "low")
@@ -36,6 +44,25 @@ def evaluate_request(request: dict[str, Any]) -> Decision:
     app_sensitivity = request.get("app_sensitivity", "standard")
 
     controls = ["IDENTITY_VERIFICATION", "AUDIT_LOGGING"]
+    context = {
+        "user_risk": user_risk,
+        "location_risk": location_risk,
+        "mfa_strength": mfa_strength,
+        "app_sensitivity": app_sensitivity,
+    }
+
+    invalid_fields = [
+        field
+        for field, value in context.items()
+        if value not in VALID_CONTEXT_VALUES[field]
+    ]
+    if invalid_fields:
+        return Decision(
+            request_id,
+            "deny",
+            f"invalid security context: unsupported value for {', '.join(invalid_fields)}",
+            controls + ["CONTEXT_VALIDATION", "FAIL_CLOSED"],
+        )
 
     if not device_compliant:
         return Decision(
